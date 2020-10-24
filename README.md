@@ -1,5 +1,5 @@
 # ocr_form_autofill
-## dependencies
+### dependencies
 - opencv-python
 - pytesseract
   - tesseract binaries for required os
