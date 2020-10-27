@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <script src="./js/cropper.min.js" charset="utf-8"></script>
+    <script src="./js/main.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="./css/cropper.min.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <title></title>
+</head>
+
+<body>
+    <!-- image input -->
+    <!-- capture new -->
+    <div class="camera">
+        <video id="cam-input">WebCam not available</video>
+        <button type="button" name="button" id="cam-capture">Capture</button>
+    </div>
+    <!-- file input -->
+    <div id="cam-canvas-div">
+        <canvas id="cam-canvas"></canvas>
+    </div>
+    <button type="button" name="button" id="cam-crop">Crop</button>
+    <input type="range" name="" min="-180" max="180" value="0" id="cam-rot-range">
+    <div class="cam-output">
+        <img id="cam-img" alt="Captured Image">
+    </div>
+    <!--/ image input -->
+
+    <form class="" action="index.html" method="post">
+        <input type="text" name="name" value=""><br>
+        <input type="text" name="father_name" value=""><br>
+        <input type="text" name="dob" value=""><br>
+        <input type="text" name="pan" value=""><br>
+        <!-- photo -->
+    </form>
+</body>
+
+</html>

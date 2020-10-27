@@ -1,0 +1,8 @@
+#cam-canvas-div {
+    width: 320px;
+}
+
+#cam-canvas {
+    display: block;
+    max-width: 100%;
+}
