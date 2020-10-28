@@ -1,6 +1,6 @@
 (function() {
     var camHeight = 0;
-    var camWidth = 320;
+    var camWidth = 500;
 
     var streaming = false;
 
@@ -10,6 +10,7 @@
     var camCapture = null;
     var camCrop = null;
     var camRotRange = null;
+    var imgUpload = null;
 
     function loadCam() {
         camInput = document.getElementById("cam-input");
@@ -19,19 +20,23 @@
         camCapture = document.getElementById("cam-capture");
         camCrop = document.getElementById("cam-crop");
         camRotRange = document.getElementById("cam-rot-range");
+        imgUpload = document.getElementById("img-upload");
 
-        navigator.mediaDevices.getUserMedia({video: true, audio: false})
-        .then(function(stream) {
-            camInput.srcObject = stream;
-            camInput.play();
-        })
-        .catch(function(err) {
-            console.log("error occurred while playing video stream " + err);
-        });
+        navigator.mediaDevices.getUserMedia({
+                video: true,
+                audio: false
+            })
+            .then(function(stream) {
+                camInput.srcObject = stream;
+                camInput.play();
+            })
+            .catch(function(err) {
+                console.log("error occurred while playing video stream " + err);
+            });
 
         camInput.addEventListener("canplay", function(ev) {
-            if(!streaming) {
-                camHeight = camInput.videoHeight / (camInput.videoWidth/camWidth);
+            if (!streaming) {
+                camHeight = camInput.videoHeight / (camInput.videoWidth / camWidth);
 
                 camInput.setAttribute("width", camWidth);
                 camInput.setAttribute("height", camHeight);
@@ -45,9 +50,25 @@
         }, false);
 
         camCapture.addEventListener("click", function(ev) {
-            takePicture();
+            takePicture(camInput);
             ev.preventDefault();
         }, false);
+
+        imgUpload.addEventListener("change", function(ev) {
+            if (this.files && this.files.length > 0) {
+                var file = this.files[0];
+                var fr = new FileReader();
+                fr.onload = function() {
+                    var img = new Image();
+                    img.onload = function() {
+                        setTimeout(takePicture(img), 10);
+                    }
+                    img.src = fr.result;
+                }
+                fr.readAsDataURL(file);
+            }
+            ev.preventDefault();
+        });
 
         clearPhoto();
     }
@@ -56,40 +77,71 @@
         var ctx = camCanvas.getContext("2d");
         ctx.fillStyle = "#aaa";
         ctx.fillRect(0, 0, camCanvas.width, camCanvas.height);
-
-        // var data = camCanvas.toDataURL("image/png");
-        // camImg.setAttribute("src", data);
     }
 
-    function takePicture() {
+    function processImg(imgData) {
+        const csrftoken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+        var file;
+
+        function urltoFile(url, filename, mimeType) {
+            return (fetch(url)
+                .then(function(res) {
+                    return res.arrayBuffer();
+                })
+                .then(function(buf) {
+                    return new File([buf], filename, {
+                        type: mimeType
+                    });
+                })
+            );
+        }
+
+        urltoFile(imgData, "img", imgData.split(";base64")[0].split(":")[1])
+            .then(function(file) {
+                var formData = new FormData();
+                formData.append("img", file);
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function() {
+                    if (this.readyState === 4 && this.status === 200) {
+                        var resp = JSON.parse(this.responseText);
+                        console.log(resp);
+                        var form = document.getElementById("content-form");
+                        form.name.value = resp.name;
+                        form.father_name.value = resp.fathername;
+                        form.dob.value = resp.dob;
+                        form.pan.value = resp.pan;
+                    }
+                };
+                xhttp.open("POST", "read_image", true);
+                xhttp.setRequestHeader("X-CSRFToken", csrftoken);
+                xhttp.send(formData);
+            });
+    }
+
+    function takePicture(input) {
+        if (camCanvas.classList.contains("cropper-hidden")) {
+            clearPhoto();
+            camCanvas.cropper.destroy();
+        }
         var ctx = camCanvas.getContext("2d");
         if (camWidth && camHeight) {
-            camCanvas.width = camWidth;
-            camCanvas.height = camHeight;
-            ctx.drawImage(camInput, 0, 0, camWidth, camHeight);
-
-            // var data = camCanvas.toDataURL("image/png");
-            // camImg.setAttribute("src", data);
+            camCanvas.width = input.width ? input.width : camWidth;
+            camCanvas.height = input.height ? input.height : camHeight;
+            ctx.drawImage(input, 0, 0, camCanvas.width, camCanvas.height);
 
             const cropper = new Cropper(camCanvas, {
-              aspectRatio: 8.56 / 5.4,
-              viewMode: 0,
-              dragMode: 'move',
-              crop(event) {
-                // console.log(event.detail.x);
-                // console.log(event.detail.y);
-                // console.log(event.detail.width);
-                // console.log(event.detail.height);
-                // console.log(event.detail.rotate);
-                // console.log(event.detail.scaleX);
-                // console.log(event.detail.scaleY);
-              },
+                aspectRatio: 8.56 / 5.4,
+                viewMode: 2,
+                preview: Element,
+                dragMode: 'move'
             });
 
             camCrop.addEventListener("click", function() {
                 var cropped = cropper.getCroppedCanvas();
                 var imgData = cropped.toDataURL("image/jpg");
                 camImg.setAttribute("src", imgData);
+
+                processImg(imgData);
             });
 
             camRotRange.addEventListener("input", function() {

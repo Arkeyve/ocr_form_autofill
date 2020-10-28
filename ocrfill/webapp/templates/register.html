@@ -17,6 +17,7 @@
         <video id="cam-input">WebCam not available</video>
         <button type="button" name="button" id="cam-capture">Capture</button>
     </div>
+    <input type="file" name="" value="" id="img-upload"><br>
     <!-- file input -->
     <div id="cam-canvas-div">
         <canvas id="cam-canvas"></canvas>
@@ -24,11 +25,14 @@
     <button type="button" name="button" id="cam-crop">Crop</button>
     <input type="range" name="" min="-180" max="180" value="0" id="cam-rot-range">
     <div class="cam-output">
-        <img id="cam-img" alt="Captured Image">
+        <form class="" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <img id="cam-img" alt="Captured Image">
+        </form>
     </div>
     <!--/ image input -->
 
-    <form class="" action="index.html" method="post">
+    <form class="" action="index.html" method="post" id="content-form">
         <input type="text" name="name" value=""><br>
         <input type="text" name="father_name" value=""><br>
         <input type="text" name="dob" value=""><br>

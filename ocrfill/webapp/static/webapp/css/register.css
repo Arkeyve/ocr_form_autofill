@@ -1,5 +1,7 @@
 #cam-canvas-div {
-    width: 320px;
+    width: 500px;
+    height: 400px;
+    overflow: hidden;
 }
 
 #cam-canvas {
