@@ -11,6 +11,7 @@
     var camCrop = null;
     var camRotRange = null;
     var imgUpload = null;
+    var faceCutout = null;
 
     function loadCam() {
         camInput = document.getElementById("cam-input");
@@ -21,6 +22,7 @@
         camCrop = document.getElementById("cam-crop");
         camRotRange = document.getElementById("cam-rot-range");
         imgUpload = document.getElementById("img-upload");
+        faceCutout = document.getElementById("face-cutout");
 
         navigator.mediaDevices.getUserMedia({
                 video: true,
@@ -110,6 +112,21 @@
                         form.father_name.value = resp.fathername;
                         form.dob.value = resp.dob;
                         form.pan.value = resp.pan;
+
+                        if(resp.faceloc.toString().length > 0) {
+                            var x, y, w, h;
+                            x = Number(resp.faceloc.x);
+                            y = Number(resp.faceloc.y);
+                            w = Number(resp.faceloc.w);
+                            h = Number(resp.faceloc.h);
+
+                            var faceCtx = faceCutout.getContext("2d");
+                            faceCtx.fillStyle = "#fff";
+                            faceCtx.fillRect(0, 0, faceCutout.width, faceCutout.height);
+                            faceCutout.width = w;
+                            faceCutout.height = h;
+                            faceCtx.drawImage(camImg, x, y, w, h, 0, 0, w, h);
+                        }
                     }
                 };
                 xhttp.open("POST", "read_image", true);
