@@ -1,1 +1,1 @@
-web: python ocrfill/manage.py runserver
+web: gunicorn ocrfill/ocrfill.wsgi
