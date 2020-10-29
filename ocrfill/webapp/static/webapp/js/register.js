@@ -13,6 +13,10 @@
     var imgUpload = null;
     var faceCutout = null;
 
+    var imageInput = null;
+    var croppingBoard = null;
+    var processedOutput = null;
+
     function loadCam() {
         camInput = document.getElementById("cam-input");
         camCanvas = document.getElementById("cam-canvas");
@@ -23,6 +27,10 @@
         camRotRange = document.getElementById("cam-rot-range");
         imgUpload = document.getElementById("img-upload");
         faceCutout = document.getElementById("face-cutout");
+
+        imageInput = document.getElementById("image-input");
+        croppingBoard = document.getElementById("cropping-board");
+        processedOutput = document.getElementById("processed-output");
 
         navigator.mediaDevices.getUserMedia({
                 video: true,
@@ -59,6 +67,10 @@
         imgUpload.addEventListener("change", function(ev) {
             if (this.files && this.files.length > 0) {
                 var file = this.files[0];
+
+                var imgUploadLabel = document.getElementById("img-upload-label");
+                imgUploadLabel.innerText = file.name;
+
                 var fr = new FileReader();
                 fr.onload = function() {
                     var img = new Image();
@@ -68,8 +80,21 @@
                     img.src = fr.result;
                 }
                 fr.readAsDataURL(file);
+
             }
             ev.preventDefault();
+        });
+
+        camCrop.addEventListener("click", function() {
+            var cropped = camCanvas.cropper.getCroppedCanvas();
+            var imgData = cropped.toDataURL("image/jpg");
+            camImg.setAttribute("src", imgData);
+
+            processImg(imgData);
+        });
+
+        camRotRange.addEventListener("input", function() {
+            camCanvas.cropper.rotateTo(this.value);
         });
 
         clearPhoto();
@@ -113,6 +138,9 @@
                         form.dob.value = resp.dob;
                         form.pan.value = resp.pan;
 
+                        var faceCtx = faceCutout.getContext("2d");
+                        faceCtx.fillStyle = "#fff";
+                        faceCtx.fillRect(0, 0, faceCutout.width, faceCutout.height);
                         if(resp.faceloc.toString().length > 0) {
                             var x, y, w, h;
                             x = Number(resp.faceloc.x);
@@ -120,13 +148,13 @@
                             w = Number(resp.faceloc.w);
                             h = Number(resp.faceloc.h);
 
-                            var faceCtx = faceCutout.getContext("2d");
-                            faceCtx.fillStyle = "#fff";
-                            faceCtx.fillRect(0, 0, faceCutout.width, faceCutout.height);
+
                             faceCutout.width = w;
                             faceCutout.height = h;
                             faceCtx.drawImage(camImg, x, y, w, h, 0, 0, w, h);
                         }
+
+                        loadView(processedOutput);
                     }
                 };
                 xhttp.open("POST", "read_image", true);
@@ -152,21 +180,21 @@
                 preview: Element,
                 dragMode: 'move'
             });
-
-            camCrop.addEventListener("click", function() {
-                var cropped = cropper.getCroppedCanvas();
-                var imgData = cropped.toDataURL("image/jpg");
-                camImg.setAttribute("src", imgData);
-
-                processImg(imgData);
-            });
-
-            camRotRange.addEventListener("input", function() {
-                cropper.rotateTo(this.value);
-            });
         } else {
             clearPhoto();
         }
+
+        camInput.src = "";
+        camInput.srcObject.getTracks()[0].stop();
+        loadView(croppingBoard);
+    }
+
+    function loadView(view) {
+        imageInput.classList.contains("hidden") ? undefined : imageInput.classList.add("hidden");
+        croppingBoard.classList.contains("hidden") ? undefined : croppingBoard.classList.add("hidden");
+        processedOutput.classList.contains("hidden") ? undefined : processedOutput.classList.add("hidden");
+
+        view.classList.remove("hidden");
     }
 
     window.addEventListener("load", function() {

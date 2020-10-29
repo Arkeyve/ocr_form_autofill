@@ -6,41 +6,80 @@
     <script src="{% static "webapp/js/cropper.min.js" %}" charset="utf-8"></script>
     <script src="{% static "webapp/js/register.js" %}" charset="utf-8"></script>
     <link rel="stylesheet" href="{% static "webapp/css/cropper.min.css" %}">
+    <link rel="stylesheet" href="{% static "webapp/css/skeleton.css" %}">
     <link rel="stylesheet" href="{% static "webapp/css/register.css" %}">
     <title></title>
 </head>
 
 <body>
-    <!-- image input -->
-    <!-- capture new -->
-    <div class="camera">
-        <video id="cam-input">WebCam not available</video>
-        <button type="button" name="button" id="cam-capture">Capture</button>
-    </div>
-    <input type="file" name="" value="" id="img-upload"><br>
-    <!-- file input -->
-    <div id="cam-canvas-div">
-        <canvas id="cam-canvas"></canvas>
-    </div>
-    <button type="button" name="button" id="cam-crop">Crop</button>
-    <input type="range" name="" min="-180" max="180" value="0" id="cam-rot-range">
-    <div class="cam-output">
-        <form class="" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <img id="cam-img" alt="Captured Image">
-        </form>
-    </div>
+    <div class="container">
+        <!-- image input -->
+        <div class="image-input" id="image-input">
+            Please take a picture of your PAN Card <br>
+            <div class="camera">
+                <video id="cam-input">WebCam not available</video><br>
+                <button type="button" name="button" class="button-primary" id="cam-capture">Capture</button><br>
+            </div>
+            <p>- OR -</p>
+            <label for="img-upload" class="file-upload" id="img-upload-label">Upload an Image</label>
+            <input type="file" class="hidden" id="img-upload"><br>
+        </div>
 
-    <canvas id="face-cutout"></canvas>
-    <!--/ image input -->
+        <!-- cropper -->
+        <div class="cropping-board hidden" id="cropping-board">
+            <div id="cam-canvas-div">
+                <canvas id="cam-canvas"></canvas>
+            </div>
+            <br>
+            <label for="cam-rot-range">Rotate</label>
+            <input type="range" name="" min="-180" max="180" step="10" value="0" id="cam-rot-range"><br>
+            <button type="button" name="button" class="button-primary" id="cam-crop">Crop</button>
+        </div>
 
-    <form class="" action="index.html" method="post" id="content-form">
-        <input type="text" name="name" value=""><br>
-        <input type="text" name="father_name" value=""><br>
-        <input type="text" name="dob" value=""><br>
-        <input type="text" name="pan" value=""><br>
-        <!-- photo -->
-    </form>
+        <!-- output (hidden) -->
+        <div class="cam-output hidden" id="cam-output">
+            <form class="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <img id="cam-img" alt="Captured Image">
+            </form>
+        </div>
+
+        <!-- processed output -->
+        <div class="processed-output hidden" id="processed-output">
+            <form class="" action="index.html" method="post" id="content-form">
+                <div class="row">
+                    <div class="eight columns left-align">
+                        <div class="row">
+                            <div class="six columns">
+                                <label for="name">Name</label>
+                                <input type="text" name="name" value="" id="name">
+                            </div>
+                            <div class="six columns">
+                                <label for="father_name">Father's Name</label>
+                                <input type="text" name="father_name" value="" id="father_name">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="six columns">
+                                <label for="dob">Date of Birth</label>
+                                <input type="text" name="dob" value="" id="dob">
+                            </div>
+                            <div class="six columns">
+                                <label for="pan">PAN</label>
+                                <input type="text" name="pan" value="" id="pan">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="four columns">
+                        <label for="face-cutout">Photo</label>
+                        <canvas id="face-cutout"></canvas>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>
