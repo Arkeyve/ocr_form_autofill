@@ -1,1 +1,1 @@
-web: gunicorn ocrfill/ocrfill.wsgi
+web: gunicorn --pythonpath ocrfill ocrfill.wsgi
